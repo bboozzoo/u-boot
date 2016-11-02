@@ -187,6 +187,7 @@ cat << EOF >> config.h
 #include <asm/config.h>
 #include <config_fallbacks.h>
 #include <config_uncmd_spl.h>
+#include <config_mender.h>
 EOF
 
 exit 0
