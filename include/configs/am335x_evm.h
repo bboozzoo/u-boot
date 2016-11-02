@@ -66,8 +66,7 @@
 	"fdt_high=0xffffffff\0" \
 	"boot_fdt=try\0" \
 	"rdaddr=0x81000000\0" \
-	"bootpart=0:2\0" \
-	"bootdir=/boot\0" \
+  "bootdir=/boot\0" \
 	"bootfile=zImage\0" \
 	"fdtfile=undefined\0" \
 	"console=ttyO0,115200n8\0" \
@@ -103,16 +102,16 @@
 		"nfsroot=${serverip}:${rootpath},${nfsopts} rw " \
 		"ip=dhcp\0" \
 	"bootenv=uEnv.txt\0" \
-	"loadbootenv=load mmc ${mmcdev} ${loadaddr} ${bootenv}\0" \
+  "loadbootenv=load ${mender_uboot_boot} ${loadaddr} ${bootenv}\0" \
 	"importbootenv=echo Importing environment from mmc ...; " \
 		"env import -t $loadaddr $filesize\0" \
 	"ramargs=setenv bootargs console=${console} " \
 		"${optargs} " \
 		"root=${ramroot} " \
 		"rootfstype=${ramrootfstype}\0" \
-	"loadramdisk=load mmc ${mmcdev} ${rdaddr} ramdisk.gz\0" \
-	"loadimage=load mmc ${bootpart} ${loadaddr} ${bootdir}/${bootfile}\0" \
-	"loadfdt=load mmc ${bootpart} ${fdtaddr} ${bootdir}/${fdtfile}\0" \
+  "loadramdisk=load ${mender_uboot_boot} ${rdaddr} ramdisk.gz\0" \
+  "loadimage=load ${mender_uboot_boot} ${loadaddr} ${bootdir}/${bootfile}\0" \
+  "loadfdt=load ${mender_uboot_boot} ${fdtaddr} ${bootdir}/${fdtfile}\0" \
 	"mmcloados=run mmcargs; " \
 		"if test ${boot_fdt} = yes || test ${boot_fdt} = try; then " \
 			"if run loadfdt; then " \
@@ -127,9 +126,9 @@
 		"else " \
 			"bootz; " \
 		"fi;\0" \
-	"mmcboot=mmc dev ${mmcdev}; " \
+  "mmcboot=mmc dev ${mender_uboot_dev}; " \
 		"if mmc rescan; then " \
-			"echo SD/MMC found on device ${mmcdev};" \
+      "echo SD/MMC found on device ${mender_uboot_dev};" \
 			"if run loadbootenv; then " \
 				"echo Loaded environment from ${bootenv};" \
 				"run importbootenv;" \
@@ -173,12 +172,10 @@
 #endif
 
 #define CONFIG_BOOTCOMMAND \
-	"run findfdt; " \
-	"run mmcboot;" \
-	"setenv mmcdev 1; " \
-	"setenv bootpart 1:2; " \
-	"run mmcboot;" \
-	"run nandboot;"
+  "run mender_setup; "   \
+  "run findfdt; " \
+  "run mmcboot;" \
+  "run mender_try_to_recover\0"
 
 /* NS16550 Configuration */
 #define CONFIG_SYS_NS16550_COM1		0x44e09000	/* Base EVM has UART0 */
@@ -206,7 +203,7 @@
 
 /* Bootcount using the RTC block */
 #define CONFIG_BOOTCOUNT_LIMIT
-#define CONFIG_BOOTCOUNT_AM33XX
+#define CONFIG_BOOTCOUNT_ENV
 
 /* USB gadget RNDIS */
 #define CONFIG_SPL_MUSB_NEW_SUPPORT
