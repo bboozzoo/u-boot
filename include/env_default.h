@@ -10,6 +10,8 @@
 
 #include <env_callback.h>
 
+#include <env_mender.h>
+
 #ifdef DEFAULT_ENV_INSTANCE_EMBEDDED
 env_t environment __PPCENV__ = {
 	ENV_CRC,	/* CRC Sum */
