@@ -34,7 +34,7 @@
 #define MTDIDS_DEFAULT		"nor2=40000000.flash"
 #define MTDPARTS_DEFAULT  "mtdparts=40000000.flash:"  \
   "1m(u-boot)ro," \
-  "1m(u-boot-env)ro," \
+  "1m(u-boot-env)," \
   "-(ubi)"
 
 #ifdef CONFIG_EXTRA_ENV_SETTINGS
@@ -44,8 +44,10 @@
 #define UBI_BOOTCMD \
  	"ubiboot=" \
 	"echo Booting from NOR...; "                                          \
-	"ubi part ubi && "                                                    \
-	"ubifsmount ubi0:rootfs && "                                          \
+	"run mender_setup; "                                                  \
+	"run set_ubiargs; "                                                   \
+	"ubi part ${mender_mtd_ubi_dev_name} && "                             \
+	"ubifsmount ${mender_uboot_root_name} && "                            \
 	"ubifsload ${kernel_addr_r} /boot/zImage && "                         \
 	"ubifsload ${fdt_addr_r} /boot/${fdtfile} && "                        \
   "setenv bootargs ${mtdparts} ${ubiargs} ${defargs} && "               \
@@ -57,11 +59,12 @@
   "fdt_addr_r=0x60000000\0"                                             \
   "fdtfile=vexpress-v2p-ca9.dtb\0"                                      \
   "mtdparts=" MTDPARTS_DEFAULT "\0"                                     \
-  "ubiargs=ubi.mtd=2 root=ubi0:rootfs rootfstype=ubifs ubi.fm_autoconvert=1\0" \
+  "set_ubiargs=setenv ubiargs ubi.mtd=${mender_mtd_ubi_dev_name} "      \
+              "root=${mender_kernel_root} rootfstype=ubifs ubi.fm_autoconvert=1\0"  \
   "defargs=console=ttyAMA0,115200n8 panic=3\0"
 
 #undef CONFIG_BOOTCOMMAND
-#define CONFIG_BOOTCOMMAND "run ubiboot; reset; "
+#define CONFIG_BOOTCOMMAND "run ubiboot; run mender_try_to_recover; "
 
 /* environment starts at 1MB offset in the flash */
 #undef CONFIG_ENV_OFFSET
@@ -70,5 +73,11 @@
 #undef CONFIG_ENV_ADDR
 /* required for automatic calculation of CONFIG_ENV_ADDR */
 #define CONFIG_SYS_FLASH_BASE CONFIG_SYS_FLASH_BASE0
+
+#define CONFIG_BOOTCOUNT_ENV
+#define CONFIG_BOOTCOUNT_LIMIT
+
+/* Mender integration will set this */
+#undef CONFIG_ENV_OFFSET
 
 #endif /* VEXPRESS_CA9X4_H */
