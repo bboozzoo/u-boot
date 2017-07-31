@@ -182,7 +182,8 @@
 #define CONFIG_ENV_OFFSET		(8 * SZ_64K)
 #elif defined(CONFIG_ENV_IS_IN_NAND)
 #define CONFIG_ENV_SECT_SIZE		(128 * 1024)
-#define CONFIG_ENV_OFFSET		(28 * CONFIG_ENV_SECT_SIZE)
+/* configured by mender integration */
+/* #define CONFIG_ENV_OFFSET		(28 * CONFIG_ENV_SECT_SIZE) */
 #define CONFIG_ENV_SIZE			CONFIG_ENV_SECT_SIZE
 #endif
 
@@ -249,5 +250,8 @@
 #define CONFIG_VIDEO_BMP_RLE8
 #define CONFIG_VIDEO_BMP_LOGO
 #endif
+
+#define CONFIG_BOOTCOUNT_LIMIT
+#define CONFIG_BOOTCOUNT_ENV
 
 #endif
