@@ -94,17 +94,20 @@
 		"run fdt_fixup && bootz ${kernel_addr_r} - ${fdt_addr_r}\0" \
 
 #define UBI_BOOTCMD	\
-	"ubiargs=ubi.mtd=ubi root=ubi0:rootfs rootfstype=ubifs " \
+	"ubiargs=ubi.mtd=${mender_mtd_ubi_dev_name} root=${mender_kernel_root} rootfstype=ubifs " \
 		"ubi.fm_autoconvert=1\0" \
-	"ubiboot=run setup; " \
-		"setenv bootargs ${defargs} ${ubiargs} " \
+		"ubiboot=run setup; " \
+		"setenv fdtfile ${soc}-colibri-${fdt_board}.dtb; "  \
+		"setenv bootargs ${defargs} ${ubiargs} ${mtdparts} " \
 		"${setupargs} ${vidargs}; echo Booting from NAND...; " \
-		"ubi part ubi && run m4boot && " \
-		"ubi read ${kernel_addr_r} kernel && " \
-		"ubi read ${fdt_addr_r} dtb && " \
-		"run fdt_fixup && bootz ${kernel_addr_r} - ${fdt_addr_r}\0" \
+		"run mender_setup; "                                   \
+		"ubi part ${mender_mtd_ubi_dev_name} && "              \
+  	"ubifsmount ${mender_uboot_root_name} && "             \
+  	"ubifsload ${kernel_addr_r} /boot/zImage && "          \
+  	"ubifsload ${fdt_addr_r} /boot/${fdtfile} && "         \
+  	"bootz ${kernel_addr_r} - ${fdt_addr_r}\0"             \
 
-#define CONFIG_BOOTCOMMAND "run ubiboot; " \
+#define CONFIG_BOOTCOMMAND "run ubiboot; run mender_try_to_recover; " \
 	"setenv fdtfile ${soc}-colibri-${fdt_board}.dtb && run distro_bootcmd;"
 
 #define BOOTENV_RUN_NET_USB_START ""
